@@ -1,0 +1,15 @@
+{
+  "name": "1001 Discos",
+  "short_name": "1001 Discos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#e74c3c",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/26/26805.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
