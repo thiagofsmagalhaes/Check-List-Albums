@@ -3,166 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jornada 1001 Discos</title>
+    <title>Dashboard 1001 Discos</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #1a1a1a; 
-            color: #f4f4f4; 
-            padding: 20px; 
-            max-width: 900px; 
-            margin: 0 auto;
+        :root {
+            --primary: #e74c3c;
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #e0e0e0;
+            --accent: #f1c40f;
         }
-        h1 { text-align: center; color: #e74c3c; }
-        #carregando { text-align: center; font-style: italic; margin-top: 50px; }
-        
-        .album-card { 
-            background: #2c2c2c; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border-left: 5px solid #e74c3c;
-        }
-        .album-card h3 { margin-top: 0; color: #fff; }
-        
-        .info-layout { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 15px; }
-        .status-tag { font-weight: bold; color: #2ecc71; }
-        
-        .rating-box { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
-        .rating-row { display: flex; align-items: center; justify-content: space-between; background: #383838; padding: 10px; border-radius: 8px; }
 
-        .stars { display: flex; direction: row-reverse; gap: 5px; }
-        .stars input { display: none; }
-        .stars label { font-size: 28px; color: #555; cursor: pointer; transition: color 0.2s; }
-        .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: #f1c40f; }
-        
-        .btn-salvar { 
-            background: #e74c3c; 
-            color: white; 
-            border: none; 
-            padding: 12px 20px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            width: 100%; 
-            font-size: 16px; 
-            font-weight: bold;
-            transition: background 0.3s;
+        body { 
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
         }
-        .btn-salvar:hover { background: #c0392b; }
+
+        .header { text-align: center; margin-bottom: 30px; width: 100%; max-width: 1000px; }
+        h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 10px; }
+
+        /* Painel de Controle (Filtros e Busca) */
+        .controls { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            display: flex; flex-wrap: wrap; gap: 15px; 
+            width: 100%; max-width: 1000px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+
+        .control-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+        label { font-size: 0.85rem; font-weight: bold; color: #888; text-transform: uppercase; }
         
-        hr { border: 0; border-top: 1px solid #444; margin: 20px 0; }
+        select { 
+            background: #2a2a2a; border: 1px solid #444; color: white; 
+            padding: 12px; border-radius: 8px; outline: none; transition: 0.3s;
+        }
+        select:focus { border-color: var(--primary); background: #333; }
+
+        /* Estilo Exclusivo da Barra de Pesquisa com Lupa */
+        .search-box {
+            display: flex;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+        .search-box:focus-within { border-color: var(--primary); box-shadow: 0 0 8px rgba(231, 76, 60, 0.3); }
+        .search-box input {
+            background: transparent; border: none; color: white; padding: 12px;
+            flex: 1; outline: none; font-size: 1rem;
+        }
+        .btn-lupa {
+            background: var(--primary); border: none; color: white;
+            padding: 0 18px; font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+        }
+        .btn-lupa:hover { background: #c0392b; }
+
+        /* Grid de Discos */
+        #lista-discos { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 20px; width: 100%; max-width: 1000px; 
+        }
+
+        .album-card { 
+            background: var(--card-bg); border-radius: 12px; padding: 20px; 
+            border: 1px solid #333; transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column;
+        }
+        .album-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.2); }
+
+        .album-id { color: var(--primary); font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
+        .album-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 5px; color: #fff; }
+        .album-artist { color: #aaa; margin-bottom: 15px; font-style: italic; }
+
+        /* Estrelas Corrigidas */
+        .rating-container { margin-bottom: 15px; border-top: 1px solid #333; padding-top: 15px; }
+        .rating-label { font-size: 0.8rem; color: #777; margin-bottom: 5px; display: block; }
+        
+        .star-rating { display: flex; gap: 5px; margin-bottom: 10px; flex-direction: row-reverse; justify-content: flex-end; }
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 24px; color: #444; cursor: pointer; transition: 0.2s; }
+        
+        .star-rating input:checked ~ label { color: #444; } 
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked + label,
+        .star-rating input:checked + label ~ label { color: var(--accent) !important; }
+
+        .btn-salvar { 
+            background: var(--primary); color: white; border: none; padding: 12px; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;
+            margin-top: auto;
+        }
+        .btn-salvar:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-salvar:disabled { background: #555; cursor: not-allowed; }
+
+        #status-msg { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; display: none; z-index: 100; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1>Minha Coleção: 1001 Discos</h1>
-    <div id="carregando">Sincronizando com a planilha... aguenta aí, mermão!</div>
-    <div id="lista-discos"></div>
+    <div class="header">
+        <h1>1001 Discos Para Ouvir Antes de Morrer</h1>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Pesquisa</label>
+            <div class="search-box">
+                <input type="text" id="inputBusca" placeholder="Artista, Álbum ou ID..." onkeyup="if(event.key === 'Enter') filtrarDados()">
+                <button class="btn-lupa" onclick="filtrarDados()" title="Pesquisar">🔍</button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>Década</label>
+            <select id="selectDecada" onchange="filtrarDados()">
+                <option value="">Todas</option>
+                <option value="1950">1950s</option>
+                <option value="1960">1960s</option>
+                <option value="1970">1970s</option>
+                <option value="1980">1980s</option>
+                <option value="1990">1990s</option>
+                <option value="2000">2000s</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Status</label>
+            <select id="selectStatus" onchange="filtrarDados()">
+                <option value="">Todos</option>
+                <option value="Ouvido">Ouvidos</option>
+                <option value="Pendente">Pendentes</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="lista-discos">
+        <p style="text-align: center; width: 100%;">Carregando banco de dados...</p>
+    </div>
+    
+    <div id="status-msg"></div>
 
     <script>
-        // Use a sua URL do Apps Script aqui
+        // COLOQUE SUA URL AQUI:
         const URL_API = "https://script.google.com/macros/s/AKfycbzbNp4QIWH9wuAoqgCkhK8Hh8PNaKQ8N8ksUk1HOKocpPRQY16b-DY3NR-62-dnKpuzpw/exec"; 
+        let database = [];
 
-        // Carregar dados ao iniciar
+        // Inicialização
         fetch(URL_API)
-            .then(response => response.json())
+            .then(res => res.json())
             .then(dados => {
-                document.getElementById('carregando').style.display = 'none';
-                renderizarDiscos(dados);
-            })
-            .catch(err => {
-                document.getElementById('carregando').innerHTML = "Deu zebra ao carregar os dados. Verifica a conexão!";
-                console.error(err);
+                database = dados;
+                filtrarDados(); // Mostra tudo ao carregar
             });
 
-        function renderizarDiscos(discos) {
+        function filtrarDados() {
+            // Pegamos o valor e removemos espaços extras nas pontas
+            const busca = document.getElementById('inputBusca').value.toLowerCase().trim();
+            const decada = document.getElementById('selectDecada').value;
+            const status = document.getElementById('selectStatus').value;
+
+            const filtrados = database.filter(d => {
+                // TRATAMENTO DE ERRO: Converte tudo para texto (String) antes de pesquisar.
+                // Isso evita que a pesquisa quebre se a célula no Excel estiver vazia (null/undefined)
+                const artista = String(d.ARTISTA || "").toLowerCase();
+                const album = String(d.ALBUM || "").toLowerCase();
+                const idStr = String(d.ID || "");
+
+                // Verifica se o texto digitado está dentro do artista, do álbum ou é o ID exato
+                const matchBusca = busca === "" || artista.includes(busca) || album.includes(busca) || idStr.includes(busca);
+                
+                // Tratamento seguro para Década e Status
+                const matchDecada = decada === "" || String(d.DÉCADA) === decada;
+                const matchStatus = status === "" || (status === "Ouvido" ? d.STATUS === "Ouvido" : d.STATUS !== "Ouvido");
+                
+                return matchBusca && matchDecada && matchStatus;
+            });
+
+            renderizar(filtrados);
+        }
+
+        function renderizar(lista) {
             const container = document.getElementById('lista-discos');
-            
-            // Loop em TODOS os discos (sem o slice de 10)
-            discos.forEach(disco => { 
+            container.innerHTML = lista.length === 0 ? '<p style="text-align:center; width:100%;">Nenhum disco encontrado na busca, mermão.</p>' : '';
+
+            lista.forEach(disco => {
                 const card = document.createElement('div');
                 card.className = 'album-card';
-                
-                // Formata o ID com zeros à esquerda para ficar padrão engenharia
-                const idFormatado = disco.ID.toString().padStart(4, '0');
-                const statusAtual = disco.STATUS === "Ouvido" ? `<span class="status-tag">✔ Ouvido</span>` : `<span style="color: #999;">Pendente</span>`;
-
                 card.innerHTML = `
-                    <div class="info-layout">
-                        <h3>#${idFormatado} - ${disco.ALBUM}</h3>
-                        <div>${statusAtual}</div>
-                    </div>
-                    <p style="margin-top: -10px; color: #bbb;"><strong>${disco.ARTISTA}</strong> — Década de ${disco.DÉCADA}</p>
-                    <p style="font-size: 12px; color: #888;">Última escuta registrada: ${disco['DATA DA ESCUTA'] || "Nunca"}</p>
+                    <div class="album-id">#${String(disco.ID).padStart(4, '0')}</div>
+                    <div class="album-title">${disco.ALBUM}</div>
+                    <div class="album-artist">${disco.ARTISTA} (${disco.DÉCADA})</div>
                     
-                    <div class="rating-box">
-                        <div class="rating-row">
-                            <span>Qualidade Técnica:</span>
-                            <div class="stars">
-                                ${gerarEstrelas(disco.ID, 'mus')}
-                            </div>
-                        </div>
+                    <div class="rating-container">
+                        <span class="rating-label">Qualidade Musical</span>
+                        <div class="star-rating">${gerarEstrelas(disco.ID, 'mus', disco['NOTA MUSICAL'])}</div>
+                        
+                        <span class="rating-label">Gosto Pessoal</span>
+                        <div class="star-rating">${gerarEstrelas(disco.ID, 'pes', disco['NOTA PESSOAL'])}</div>
+                    </div>
 
-                        <div class="rating-row">
-                            <span>Gosto Pessoal:</span>
-                            <div class="stars">
-                                ${gerarEstrelas(disco.ID, 'pes')}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button class="btn-salvar" onclick="salvarNota(${disco.ID})">Registrar no Sistema</button>
+                    <button class="btn-salvar" onclick="salvar(${disco.ID}, this)">REGISTRAR ESCUTA</button>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Função auxiliar para criar o HTML das estrelas
-        function gerarEstrelas(id, prefixo) {
+        function gerarEstrelas(id, tipo, notaAtual) {
             let html = '';
             for (let i = 5; i >= 1; i--) {
+                const checked = i == notaAtual ? 'checked' : '';
                 html += `
-                    <input type="radio" id="${prefixo}${i}_${id}" name="${prefixo}_${id}" value="${i}">
-                    <label for="${prefixo}${i}_${id}">★</label>
+                    <input type="radio" id="${tipo}${i}_${id}" name="${tipo}_${id}" value="${i}" ${checked}>
+                    <label for="${tipo}${i}_${id}">★</label>
                 `;
             }
             return html;
         }
 
-        function salvarNota(id) {
-            const notaMusical = document.querySelector(`input[name="mus_${id}"]:checked`)?.value || 0;
-            const notaPessoal = document.querySelector(`input[name="pes_${id}"]:checked`)?.value || 0;
+        function salvar(id, btn) {
+            const mus = document.querySelector(`input[name="mus_${id}"]:checked`)?.value;
+            const pes = document.querySelector(`input[name="pes_${id}"]:checked`)?.value;
 
-            if(notaMusical == 0 || notaPessoal == 0) {
-                alert("Não esquece de dar as notas antes de salvar, parceiro!");
-                return;
-            }
+            if (!mus || !pes) return alert("Parceiro, marca as estrelas antes de salvar o dossiê!");
 
-            // Mostra um feedback visual de carregamento no botão
-            const btn = event.target;
-            const textoOriginal = btn.innerHTML;
-            btn.innerHTML = "Gravando...";
             btn.disabled = true;
+            btn.innerHTML = "SALVANDO...";
 
             fetch(URL_API, {
                 method: 'POST',
-                body: JSON.stringify({
-                    id: id,
-                    notaMusical: notaMusical,
-                    notaPessoal: notaPessoal
-                })
+                body: JSON.stringify({ id, notaMusical: mus, notaPessoal: pes })
             })
-            .then(res => res.text())
-            .then(msg => {
-                alert("Notas enviadas com sucesso pra planilha!");
-                location.reload(); 
+            .then(() => {
+                showMsg("Boa! Planilha atualizada com sucesso.", "#2ecc71");
+                btn.innerHTML = "ATUALIZADO!";
+                
+                const idx = database.findIndex(d => d.ID == id);
+                if(idx !== -1) {
+                    database[idx].STATUS = "Ouvido";
+                    database[idx]['NOTA MUSICAL'] = mus;
+                    database[idx]['NOTA PESSOAL'] = pes;
+                }
             })
-            .catch(err => {
-                alert("Houve um erro no processo. Tenta de novo!");
-                btn.innerHTML = textoOriginal;
+            .catch(() => {
+                showMsg("Deu erro na conexão com o Google Sheets!", "#e74c3c");
                 btn.disabled = false;
+                btn.innerHTML = "TENTAR DE NOVO";
             });
+        }
+
+        function showMsg(txt, color) {
+            const m = document.getElementById('status-msg');
+            m.innerText = txt;
+            m.style.backgroundColor = color;
+            m.style.display = 'block';
+            setTimeout(() => m.style.display = 'none', 3000);
         }
     </script>
 </body>
