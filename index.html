@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jornada 1001 Discos</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #1a1a1a; color: #f4f4f4; padding: 20px; }
+        .album-card { background: #2c2c2c; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        .stars { display: flex; direction: row-reverse; gap: 5px; justify-content: flex-end;}
+        .stars input { display: none; }
+        .stars label { font-size: 30px; color: #555; cursor: pointer; }
+        .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: #f1c40f; }
+        button { background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <h1>Coleção: 1001 Discos</h1>
+    <div id="carregando">Puxando os dados da planilha... aguenta aí!</div>
+    <div id="lista-discos"></div>
+
+    <script>
+        // COLA A URL QUE O GOOGLE TE DEU AQUI ENTRE AS ASPAS
+        const URL_API = "https://script.google.com/macros/s/AKfycbzbNp4QIWH9wuAoqgCkhK8Hh8PNaKQ8N8ksUk1HOKocpPRQY16b-DY3NR-62-dnKpuzpw/exec"; 
+
+        // Carrega os dados quando a página abre
+        fetch(URL_API)
+            .then(response => response.json())
+            .then(dados => {
+                document.getElementById('carregando').style.display = 'none';
+                renderizarDiscos(dados);
+            });
+
+        function renderizarDiscos(discos) {
+            const container = document.getElementById('lista-discos');
+            // Pegando só os primeiros 10 pra carregar rápido nos testes
+            discos.slice(0, 10).forEach(disco => { 
+                const card = document.createElement('div');
+                card.className = 'album-card';
+                card.innerHTML = `
+                    <h3>#${disco.ID} - ${disco.ALBUM} (${disco.ARTISTA})</h3>
+                    <p>Status atual: ${disco.STATUS || "Pendente"} | Ouvido em: ${disco['DATA DA ESCUTA'] || "-"}</p>
+                    
+                    <label>Qualidade Musical:</label>
+                    <div class="stars">
+                        <input type="radio" id="m5_${disco.ID}" name="mus_${disco.ID}" value="5"><label for="m5_${disco.ID}">★</label>
+                        <input type="radio" id="m4_${disco.ID}" name="mus_${disco.ID}" value="4"><label for="m4_${disco.ID}">★</label>
+                        <input type="radio" id="m3_${disco.ID}" name="mus_${disco.ID}" value="3"><label for="m3_${disco.ID}">★</label>
+                        <input type="radio" id="m2_${disco.ID}" name="mus_${disco.ID}" value="2"><label for="m2_${disco.ID}">★</label>
+                        <input type="radio" id="m1_${disco.ID}" name="mus_${disco.ID}" value="1"><label for="m1_${disco.ID}">★</label>
+                    </div>
+
+                    <label>Gosto Pessoal:</label>
+                    <div class="stars">
+                        <input type="radio" id="p5_${disco.ID}" name="pes_${disco.ID}" value="5"><label for="p5_${disco.ID}">★</label>
+                        <input type="radio" id="p4_${disco.ID}" name="pes_${disco.ID}" value="4"><label for="p4_${disco.ID}">★</label>
+                        <input type="radio" id="p3_${disco.ID}" name="pes_${disco.ID}" value="3"><label for="p3_${disco.ID}">★</label>
+                        <input type="radio" id="p2_${disco.ID}" name="pes_${disco.ID}" value="2"><label for="p2_${disco.ID}">★</label>
+                        <input type="radio" id="p1_${disco.ID}" name="pes_${disco.ID}" value="1"><label for="p1_${disco.ID}">★</label>
+                    </div>
+                    
+                    <button onclick="salvarNota(${disco.ID})">Salvar Notas na Planilha</button>
+                    <hr>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function salvarNota(id) {
+            // Pega os valores que tu marcou nas estrelas
+            const notaMusical = document.querySelector(`input[name="mus_${id}"]:checked`)?.value || 0;
+            const notaPessoal = document.querySelector(`input[name="pes_${id}"]:checked`)?.value || 0;
+
+            if(notaMusical == 0 || notaPessoal == 0) {
+                alert("Mermão, marca as estrelas antes de salvar!");
+                return;
+            }
+
+            // Manda o pacote de dados pro Apps Script
+            fetch(URL_API, {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: id,
+                    notaMusical: notaMusical,
+                    notaPessoal: notaPessoal
+                })
+            }).then(() => {
+                alert("Show! As notas foram lá pro Google Sheets.");
+                location.reload(); // Recarrega pra ver os dados novos
+            });
+        }
+    </script>
+</body>
+</html>
