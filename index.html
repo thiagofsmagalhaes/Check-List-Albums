@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard 1001 Discos</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#e74c3c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="1001 Discos">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/26/26805.png">
+
     <style>
         :root {
             --primary: #e74c3c;
@@ -14,7 +22,7 @@
         }
 
         body { 
-            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             background-color: var(--bg); 
             color: var(--text); 
             margin: 0; padding: 20px;
@@ -22,9 +30,10 @@
         }
 
         .header { text-align: center; margin-bottom: 30px; width: 100%; max-width: 1000px; }
-        h1 { color: var(--primary); font-size: 2.5rem; margin-bottom: 10px; }
+        h1 { color: var(--primary); font-size: 2.2rem; margin-bottom: 5px; }
+        .sub { color: #888; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Painel de Controle (Filtros e Busca) */
+        /* Painel de Controle */
         .controls { 
             background: var(--card-bg); 
             padding: 20px; 
@@ -37,17 +46,17 @@
             border: 1px solid #333;
         }
 
-        .control-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
-        label { font-size: 0.85rem; font-weight: bold; color: #888; text-transform: uppercase; }
+        .control-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 220px; }
+        label { font-size: 0.75rem; font-weight: bold; color: #666; text-transform: uppercase; }
         
         select { 
             background: #2a2a2a; border: 1px solid #444; color: white; 
             padding: 12px; border-radius: 8px; outline: none; transition: 0.3s;
+            cursor: pointer;
         }
-        select:focus { border-color: var(--primary); background: #333; }
 
-        /* Estilo Exclusivo da Barra de Pesquisa com Lupa */
-        .search-box {
+        /* Barra de Pesquisa com Lupa */
+        .search-container {
             display: flex;
             background: #2a2a2a;
             border: 1px solid #444;
@@ -55,16 +64,17 @@
             overflow: hidden;
             transition: 0.3s;
         }
-        .search-box:focus-within { border-color: var(--primary); box-shadow: 0 0 8px rgba(231, 76, 60, 0.3); }
-        .search-box input {
+        .search-container:focus-within { border-color: var(--primary); }
+        .search-container input {
             background: transparent; border: none; color: white; padding: 12px;
             flex: 1; outline: none; font-size: 1rem;
         }
-        .btn-lupa {
+        .btn-search {
             background: var(--primary); border: none; color: white;
-            padding: 0 18px; font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+            padding: 0 15px; cursor: pointer; transition: 0.3s;
+            font-size: 1.1rem;
         }
-        .btn-lupa:hover { background: #c0392b; }
+        .btn-search:hover { background: #c0392b; }
 
         /* Grid de Discos */
         #lista-discos { 
@@ -74,58 +84,63 @@
 
         .album-card { 
             background: var(--card-bg); border-radius: 12px; padding: 20px; 
-            border: 1px solid #333; transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #333; transition: 0.3s;
             display: flex; flex-direction: column;
         }
-        .album-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.2); }
+        .album-card:hover { border-color: var(--primary); transform: translateY(-3px); }
 
-        .album-id { color: var(--primary); font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; }
-        .album-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 5px; color: #fff; }
-        .album-artist { color: #aaa; margin-bottom: 15px; font-style: italic; }
+        .album-id { color: var(--primary); font-weight: bold; font-size: 0.8rem; margin-bottom: 5px; }
+        .album-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 3px; color: #fff; line-height: 1.2; }
+        .album-artist { color: #888; margin-bottom: 15px; font-size: 0.95rem; }
 
         /* Estrelas Corrigidas */
-        .rating-container { margin-bottom: 15px; border-top: 1px solid #333; padding-top: 15px; }
-        .rating-label { font-size: 0.8rem; color: #777; margin-bottom: 5px; display: block; }
+        .rating-section { margin-top: auto; border-top: 1px solid #333; padding-top: 15px; }
+        .rating-title { font-size: 0.7rem; color: #555; text-transform: uppercase; margin-bottom: 8px; display: block; }
         
-        .star-rating { display: flex; gap: 5px; margin-bottom: 10px; flex-direction: row-reverse; justify-content: flex-end; }
+        .star-rating { display: flex; gap: 4px; margin-bottom: 12px; flex-direction: row-reverse; justify-content: flex-end; }
         .star-rating input { display: none; }
-        .star-rating label { font-size: 24px; color: #444; cursor: pointer; transition: 0.2s; }
+        .star-rating label { font-size: 26px; color: #333; cursor: pointer; transition: 0.2s; }
         
-        .star-rating input:checked ~ label { color: #444; } 
+        /* Lógica das Estrelas */
+        .star-rating input:checked ~ label { color: #333; } 
         .star-rating label:hover,
         .star-rating label:hover ~ label,
         .star-rating input:checked + label,
         .star-rating input:checked + label ~ label { color: var(--accent) !important; }
 
-        .btn-salvar { 
-            background: var(--primary); color: white; border: none; padding: 12px; 
+        .btn-save { 
+            background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 12px; 
             border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s;
-            margin-top: auto;
+            text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;
         }
-        .btn-salvar:hover { opacity: 0.9; transform: scale(1.02); }
-        .btn-salvar:disabled { background: #555; cursor: not-allowed; }
+        .btn-save:hover { background: var(--primary); border-color: var(--primary); }
 
-        #status-msg { position: fixed; bottom: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; display: none; z-index: 100; font-weight: bold; }
+        #toast { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 12px 25px; border-radius: 50px; display: none; 
+            z-index: 1000; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>1001 Discos Para Ouvir Antes de Morrer</h1>
+        <h1>1001 DISCOS</h1>
+        <div class="sub">Plano de Progresso Musical</div>
     </div>
 
     <div class="controls">
         <div class="control-group">
-            <label>Pesquisa</label>
-            <div class="search-box">
-                <input type="text" id="inputBusca" placeholder="Artista, Álbum ou ID..." onkeyup="if(event.key === 'Enter') filtrarDados()">
-                <button class="btn-lupa" onclick="filtrarDados()" title="Pesquisar">🔍</button>
+            <label>Pesquisar Álbum ou Artista</label>
+            <div class="search-container">
+                <input type="text" id="inputBusca" placeholder="Ex: Pink Floyd, 0001..." onkeyup="if(event.key === 'Enter') filtrarDados()">
+                <button class="btn-search" onclick="filtrarDados()">🔍</button>
             </div>
         </div>
         <div class="control-group">
-            <label>Década</label>
+            <label>Filtrar por Década</label>
             <select id="selectDecada" onchange="filtrarDados()">
-                <option value="">Todas</option>
+                <option value="">Todas as décadas</option>
                 <option value="1950">1950s</option>
                 <option value="1960">1960s</option>
                 <option value="1970">1970s</option>
@@ -135,51 +150,46 @@
             </select>
         </div>
         <div class="control-group">
-            <label>Status</label>
+            <label>Status de Escuta</label>
             <select id="selectStatus" onchange="filtrarDados()">
-                <option value="">Todos</option>
-                <option value="Ouvido">Ouvidos</option>
-                <option value="Pendente">Pendentes</option>
+                <option value="">Todos os discos</option>
+                <option value="Ouvido">Já ouvidos</option>
+                <option value="Pendente">Ainda pendentes</option>
             </select>
         </div>
     </div>
 
     <div id="lista-discos">
-        <p style="text-align: center; width: 100%;">Carregando banco de dados...</p>
+        <p style="text-align: center; width: 100%; color: #666;">Sincronizando banco de dados...</p>
     </div>
     
-    <div id="status-msg"></div>
+    <div id="toast"></div>
 
     <script>
-        // COLOQUE SUA URL AQUI:
         const URL_API = "https://script.google.com/macros/s/AKfycbzbNp4QIWH9wuAoqgCkhK8Hh8PNaKQ8N8ksUk1HOKocpPRQY16b-DY3NR-62-dnKpuzpw/exec"; 
         let database = [];
 
-        // Inicialização
+        // Inicialização: Puxa os dados da planilha
         fetch(URL_API)
             .then(res => res.json())
             .then(dados => {
                 database = dados;
-                filtrarDados(); // Mostra tudo ao carregar
-            });
+                filtrarDados();
+            })
+            .catch(err => console.error("Erro ao conectar com a planilha:", err));
 
         function filtrarDados() {
-            // Pegamos o valor e removemos espaços extras nas pontas
             const busca = document.getElementById('inputBusca').value.toLowerCase().trim();
             const decada = document.getElementById('selectDecada').value;
             const status = document.getElementById('selectStatus').value;
 
             const filtrados = database.filter(d => {
-                // TRATAMENTO DE ERRO: Converte tudo para texto (String) antes de pesquisar.
-                // Isso evita que a pesquisa quebre se a célula no Excel estiver vazia (null/undefined)
+                // Conversão segura para String para evitar erros com células vazias
                 const artista = String(d.ARTISTA || "").toLowerCase();
                 const album = String(d.ALBUM || "").toLowerCase();
                 const idStr = String(d.ID || "");
 
-                // Verifica se o texto digitado está dentro do artista, do álbum ou é o ID exato
                 const matchBusca = busca === "" || artista.includes(busca) || album.includes(busca) || idStr.includes(busca);
-                
-                // Tratamento seguro para Década e Status
                 const matchDecada = decada === "" || String(d.DÉCADA) === decada;
                 const matchStatus = status === "" || (status === "Ouvido" ? d.STATUS === "Ouvido" : d.STATUS !== "Ouvido");
                 
@@ -191,25 +201,27 @@
 
         function renderizar(lista) {
             const container = document.getElementById('lista-discos');
-            container.innerHTML = lista.length === 0 ? '<p style="text-align:center; width:100%;">Nenhum disco encontrado na busca, mermão.</p>' : '';
+            container.innerHTML = lista.length === 0 ? '<p style="text-align:center; width:100%; color:#666;">Nenhum registro encontrado, parceiro.</p>' : '';
 
             lista.forEach(disco => {
                 const card = document.createElement('div');
                 card.className = 'album-card';
+                const statusIcon = disco.STATUS === "Ouvido" ? "✔️" : "⏳";
+                
                 card.innerHTML = `
-                    <div class="album-id">#${String(disco.ID).padStart(4, '0')}</div>
+                    <div class="album-id">#${String(disco.ID).padStart(4, '0')} ${statusIcon}</div>
                     <div class="album-title">${disco.ALBUM}</div>
                     <div class="album-artist">${disco.ARTISTA} (${disco.DÉCADA})</div>
                     
-                    <div class="rating-container">
-                        <span class="rating-label">Qualidade Musical</span>
+                    <div class="rating-section">
+                        <span class="rating-title">Qualidade Musical</span>
                         <div class="star-rating">${gerarEstrelas(disco.ID, 'mus', disco['NOTA MUSICAL'])}</div>
                         
-                        <span class="rating-label">Gosto Pessoal</span>
+                        <span class="rating-title">Gosto Pessoal</span>
                         <div class="star-rating">${gerarEstrelas(disco.ID, 'pes', disco['NOTA PESSOAL'])}</div>
+                        
+                        <button class="btn-save" onclick="salvar(${disco.ID}, this)">Salvar Registro</button>
                     </div>
-
-                    <button class="btn-salvar" onclick="salvar(${disco.ID}, this)">REGISTRAR ESCUTA</button>
                 `;
                 container.appendChild(card);
             });
@@ -231,19 +243,21 @@
             const mus = document.querySelector(`input[name="mus_${id}"]:checked`)?.value;
             const pes = document.querySelector(`input[name="pes_${id}"]:checked`)?.value;
 
-            if (!mus || !pes) return alert("Parceiro, marca as estrelas antes de salvar o dossiê!");
+            if (!mus || !pes) return alert("Marca as estrelas aí primeiro, mermão!");
 
+            const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = "SALVANDO...";
+            btn.innerHTML = "ENVIANDO...";
 
             fetch(URL_API, {
                 method: 'POST',
                 body: JSON.stringify({ id, notaMusical: mus, notaPessoal: pes })
             })
             .then(() => {
-                showMsg("Boa! Planilha atualizada com sucesso.", "#2ecc71");
-                btn.innerHTML = "ATUALIZADO!";
+                notify("Dossiê atualizado!", "#2ecc71");
+                btn.innerHTML = "SALVO!";
                 
+                // Atualiza localmente para não precisar dar reload
                 const idx = database.findIndex(d => d.ID == id);
                 if(idx !== -1) {
                     database[idx].STATUS = "Ouvido";
@@ -252,18 +266,18 @@
                 }
             })
             .catch(() => {
-                showMsg("Deu erro na conexão com o Google Sheets!", "#e74c3c");
+                notify("Erro na conexão!", "#e74c3c");
                 btn.disabled = false;
-                btn.innerHTML = "TENTAR DE NOVO";
+                btn.innerHTML = "RECOMECAR";
             });
         }
 
-        function showMsg(txt, color) {
-            const m = document.getElementById('status-msg');
-            m.innerText = txt;
-            m.style.backgroundColor = color;
-            m.style.display = 'block';
-            setTimeout(() => m.style.display = 'none', 3000);
+        function notify(txt, color) {
+            const t = document.getElementById('toast');
+            t.innerText = txt;
+            t.style.backgroundColor = color;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
     </script>
 </body>
